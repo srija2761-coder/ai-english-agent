@@ -1,0 +1,13 @@
+filepath = "uploads/temp.wav"
+
+file.save(filepath)
+
+recognizer = sr.Recognizer()
+
+with sr.AudioFile(filepath) as source:
+    audio = recognizer.record(source)
+
+text = recognizer.recognize_google(audio)
+
+# Optional:
+# os.remove(filepath)

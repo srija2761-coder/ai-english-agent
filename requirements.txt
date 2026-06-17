@@ -1,0 +1,7 @@
+Flask
+pandas
+joblib
+language-tool-python
+SpeechRecognition
+PyAudio
+requests

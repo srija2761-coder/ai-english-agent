@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Grammar & Pronunciation Analyzer</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+    <div class="container">
+
+        <h1>AI Grammar & Pronunciation Analyzer</h1>
+
+        <div class="card">
+
+            <h2>Grammar Checker</h2>
+
+            <textarea
+                id="text"
+                rows="8"
+                placeholder="Type your sentence here..."
+            ></textarea>
+
+            <button onclick="checkGrammar()">
+                Check Grammar
+            </button>
+
+        </div>
+
+        <div class="card">
+
+            <h2>Speech Analyzer</h2>
+
+            <input type="file" id="audio" accept=".wav">
+
+            <button onclick="uploadAudio()">
+                Analyze Speech
+            </button>
+
+        </div>
+
+        <div class="result">
+
+            <h2>Result</h2>
+
+            <p><strong>Original:</strong></p>
+            <p id="original"></p>
+
+            <p><strong>Corrected:</strong></p>
+            <p id="corrected"></p>
+
+            <p><strong>Mistakes Found:</strong></p>
+            <p id="mistakes"></p>
+
+        </div>
+
+    </div>
+
+   <script src="{{ url_for('static', filename='script.js') }}"></script>
+
+</body>
+</html>
