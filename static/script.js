@@ -1,107 +1,75 @@
-// Grammar Checker
 
-async function checkGrammar() {
+function openGrammar() {
+    window.location.href = "/grammar";
+}
 
-    const text = document.getElementById("text").value;
-
-    if (text.trim() === "") {
-        alert("Please enter some text.");
-        return;
-    }
-
-    try {
-
-        const response = await fetch("/grammar", {
-
-            method: "POST",
-
-            headers: {
-                "Content-Type": "application/json"
-            },
-
-            body: JSON.stringify({
-                text: text
-            })
-
-        });
-
-        const data = await response.json();
-
-        if (data.error) {
-            alert(data.error);
-            return;
-        }
-
-        document.getElementById("original").innerText =
-            data.original;
-
-        document.getElementById("corrected").innerText =
-            data.corrected;
-
-        document.getElementById("mistakes").innerText =
-            data.mistakes_found;
-
-    }
-
-    catch (error) {
-
-        console.log(error);
-        alert("Server Error");
-
-    }
-
+function openSpeech() {
+    window.location.href = "/speech";
 }
 
 
+function checkGrammar() {
+    let text = document.getElementById("grammarInput").value;
 
-// Speech Analyzer
+    fetch("/check-grammar", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ text: text })
+    })
+    .then(res => res.json())
+    .then(data => {
 
-async function uploadAudio() {
+        document.getElementById("originalText").innerText =
+            data.original;
 
-    const audio = document.getElementById("audio").files[0];
+        document.getElementById("correctedText").innerText =
+            data.corrected;
 
-    if (!audio) {
-        alert("Please select an audio file.");
+        document.getElementById("aiSuggestion").innerText =
+            data.suggestion;
+
+    })
+    .catch(err => {
+        console.error(err);
+        alert("Something went wrong");
+    });
+}
+
+
+function analyzeSpeech() {
+
+    let fileInput = document.getElementById("audioInput");
+
+    if (!fileInput.files.length) {
+        alert("Please upload an audio file!");
         return;
     }
 
-    const formData = new FormData();
+    let formData = new FormData();
+    formData.append("audio", fileInput.files[0]);
 
-    formData.append("audio", audio);
+    fetch("/analyze-speech", {
+        method: "POST",
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
 
-    try {
+        document.getElementById("originalText").innerText =
+            data.original;
 
-        const response = await fetch("/speech", {
+        document.getElementById("correctedText").innerText =
+            data.corrected;
 
-            method: "POST",
+        document.getElementById("aiSuggestion").innerText =
+            data.suggestion;
 
-            body: formData
-
-        });
-
-        const data = await response.json();
-
-        if (data.error) {
-            alert(data.error);
-            return;
-        }
-
-        document.getElementById("original").innerText =
-            data.speech_text;
-
-        document.getElementById("corrected").innerText =
-            data.corrected_text;
-
-        document.getElementById("mistakes").innerText =
-            data.mistakes_found;
-
-    }
-
-    catch (error) {
-
-        console.log(error);
-        alert("Server Error");
-
-    }
+    })
+    .catch(error => {
+        console.error(error);
+        alert("Something went wrong!");
+    });
 
 }
