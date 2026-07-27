@@ -1,11 +1,11 @@
 from flask import Flask, render_template, request, jsonify
-from agent import correct, explain
+from agent import correct, explain, rewrite_styles
 
 import speech_recognition as sr
 import tempfile
-import os
 
 app = Flask(__name__)
+
 
 @app.route('/')
 def home():
@@ -22,31 +22,38 @@ def speech():
     return render_template("speech.html")
 
 
-
 @app.route('/check-grammar', methods=['POST'])
 def check_grammar():
 
     data = request.get_json()
-
     user_input = data.get("text", "").strip()
 
     if user_input == "":
         return jsonify({
             "original": "",
             "corrected": "",
-            "suggestion": "Please enter a sentence."
+            "suggestion": "Please enter a sentence.",
+            "styles": {
+                "professional": "",
+                "formal": "",
+                "friendly": "",
+                "concise": "",
+                "advanced": ""
+            }
         })
 
     try:
 
         corrected = correct(user_input)
-
         suggestion = explain(user_input, corrected)
 
+        styles = rewrite_styles(corrected)
+        
         return jsonify({
             "original": user_input,
             "corrected": corrected,
-            "suggestion": suggestion
+            "suggestion": suggestion,
+            "styles": styles
         })
 
     except Exception as e:
@@ -54,8 +61,16 @@ def check_grammar():
         return jsonify({
             "original": user_input,
             "corrected": user_input,
-            "suggestion": f"Error: {str(e)}"
+            "suggestion": f"Error: {str(e)}",
+            "styles": {
+                "professional": "",
+                "formal": "",
+                "friendly": "",
+                "concise": "",
+                "advanced": ""
+            }
         })
+
 
 @app.route('/analyze-speech', methods=['POST'])
 def analyze_speech():
@@ -64,7 +79,14 @@ def analyze_speech():
         return jsonify({
             "original": "",
             "corrected": "",
-            "suggestion": "Please upload an audio file."
+            "suggestion": "Please upload an audio file.",
+            "styles": {
+                "professional": "",
+                "formal": "",
+                "friendly": "",
+                "concise": "",
+                "advanced": ""
+            }
         })
 
     audio = request.files['audio']
@@ -73,34 +95,54 @@ def analyze_speech():
         return jsonify({
             "original": "",
             "corrected": "",
-            "suggestion": "No audio file selected."
+            "suggestion": "No audio file selected.",
+            "styles": {
+                "professional": "",
+                "formal": "",
+                "friendly": "",
+                "concise": "",
+                "advanced": ""
+            }
         })
 
-    # Save uploaded audio temporarily
-    print("Audio received")
+    try:
 
-    temp = tempfile.NamedTemporaryFile(delete=False, suffix=".wav")
-    audio.save(temp.name)
-    temp.close()
+        temp = tempfile.NamedTemporaryFile(delete=False, suffix=".wav")
+        audio.save(temp.name)
+        temp.close()
 
-    print("Saved:", temp.name)
+        recognizer = sr.Recognizer()
 
-    recognizer = sr.Recognizer()
+        with sr.AudioFile(temp.name) as source:
+            audio_data = recognizer.record(source)
 
-    with sr.AudioFile(temp.name) as source:
-        audio_data = recognizer.record(source)
+        user_input = recognizer.recognize_google(audio_data)
 
-    user_input = recognizer.recognize_google(audio_data)
+        corrected = correct(user_input)
+        suggestion = explain(user_input, corrected)
+        styles = rewrite_styles(corrected)
 
-    corrected = correct(user_input)
-    suggestion = explain(user_input, corrected)
-   
-    return jsonify({
-        "original": user_input,
-        "corrected": corrected,
-        "suggestion": suggestion
-    })
-    
+        return jsonify({
+            "original": user_input,
+            "corrected": corrected,
+            "suggestion": suggestion,
+            "styles": styles
+        })
+
+    except Exception as e:
+
+        return jsonify({
+            "original": "",
+            "corrected": "",
+            "suggestion": f"Error: {str(e)}",
+            "styles": {
+                "professional": "",
+                "formal": "",
+                "friendly": "",
+                "concise": "",
+                "advanced": ""
+            }
+        })
 
 
 if __name__ == "__main__":

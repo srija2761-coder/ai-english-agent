@@ -1,4 +1,3 @@
-
 function openGrammar() {
     window.location.href = "/grammar";
 }
@@ -7,9 +6,14 @@ function openSpeech() {
     window.location.href = "/speech";
 }
 
-
 function checkGrammar() {
-    let text = document.getElementById("grammarInput").value;
+
+    let text = document.getElementById("grammarInput").value.trim();
+
+    if (text === "") {
+        alert("Please enter a sentence.");
+        return;
+    }
 
     fetch("/check-grammar", {
         method: "POST",
@@ -18,25 +22,59 @@ function checkGrammar() {
         },
         body: JSON.stringify({ text: text })
     })
-    .then(res => res.json())
+    .then(response => response.json())
     .then(data => {
 
+        // Debugging
+        console.log("Response from Flask:");
+        console.log(data);
+
         document.getElementById("originalText").innerText =
-            data.original;
+            data.original || "";
 
         document.getElementById("correctedText").innerText =
-            data.corrected;
+            data.corrected || "";
 
         document.getElementById("aiSuggestion").innerText =
-            data.suggestion;
+            data.suggestion || "";
+
+        if (data.styles) {
+
+            console.log("Styles:");
+            console.log(data.styles);
+
+            document.getElementById("professional").innerText =
+                data.styles.professional || "";
+
+            document.getElementById("formal").innerText =
+                data.styles.formal || "";
+
+            document.getElementById("friendly").innerText =
+                data.styles.friendly || "";
+
+            document.getElementById("concise").innerText =
+                data.styles.concise || "";
+
+            document.getElementById("advanced").innerText =
+                data.styles.advanced || "";
+
+        } else {
+
+            console.log("No styles received!");
+
+            document.getElementById("professional").innerText = "";
+            document.getElementById("formal").innerText = "";
+            document.getElementById("friendly").innerText = "";
+            document.getElementById("concise").innerText = "";
+            document.getElementById("advanced").innerText = "";
+        }
 
     })
-    .catch(err => {
-        console.error(err);
-        alert("Something went wrong");
+    .catch(error => {
+        console.error(error);
+        alert("Something went wrong!");
     });
 }
-
 
 function analyzeSpeech() {
 
@@ -57,19 +95,40 @@ function analyzeSpeech() {
     .then(response => response.json())
     .then(data => {
 
+        console.log("Speech Response:");
+        console.log(data);
+
         document.getElementById("originalText").innerText =
-            data.original;
+            data.original || "";
 
         document.getElementById("correctedText").innerText =
-            data.corrected;
+            data.corrected || "";
 
         document.getElementById("aiSuggestion").innerText =
-            data.suggestion;
+            data.suggestion || "";
+
+        if (data.styles) {
+
+            document.getElementById("professional").innerText =
+                data.styles.professional || "";
+
+            document.getElementById("formal").innerText =
+                data.styles.formal || "";
+
+            document.getElementById("friendly").innerText =
+                data.styles.friendly || "";
+
+            document.getElementById("concise").innerText =
+                data.styles.concise || "";
+
+            document.getElementById("advanced").innerText =
+                data.styles.advanced || "";
+
+        }
 
     })
     .catch(error => {
         console.error(error);
         alert("Something went wrong!");
     });
-
 }
